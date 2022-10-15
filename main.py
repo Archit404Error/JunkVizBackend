@@ -61,16 +61,17 @@ def register_user():
 
 @app.route("/add-point", methods=["POST"])
 def classify_image():
-    db.posts.insert_one(
-        {
-            "image": request.json.get("image"),
-            "litter_type": request.json.get("litter_type"),
-            "latitude": request.json.get("latitude"),
-            "longitude": request.json.get("longitude"),
-            "location": request.json.get("location"),
-            "time": datetime.utcnow(),
-        }
-    )
+    if request.json.get("detected"):
+        db.posts.insert_one(
+            {
+                "image": request.json.get("image"),
+                "litter_type": request.json.get("litter_type"),
+                "latitude": request.json.get("latitude"),
+                "longitude": request.json.get("longitude"),
+                "location": request.json.get("location"),
+                "time": datetime.utcnow(),
+            }
+        )
 
     return jsonify({"success": True})
 
