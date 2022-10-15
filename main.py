@@ -61,10 +61,9 @@ def register_user():
 
 @app.route("/add-point", methods=["POST"])
 def classify_image():
-    classified_image = request.files["classified_image"]
     db.posts.insert_one(
         {
-            "image": os.getenv("AWS_DOMAIN") + upload(classified_image),
+            "image": request.json.get("image"),
             "litter_type": request.json.get("litter_type"),
             "latitude": request.json.get("latitude"),
             "longitude": request.json.get("longitude"),
