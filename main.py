@@ -70,6 +70,7 @@ def classify_image():
                 "longitude": request.json.get("longitude"),
                 "location": request.json.get("location"),
                 "time": datetime.utcnow(),
+                "status": "litter",
             }
         )
 
