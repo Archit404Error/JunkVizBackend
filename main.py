@@ -11,6 +11,11 @@ load_dotenv()
 db = MongoClient(os.environ.get("CONNECTION_STR")).get_database("Trash")
 
 
+@app.route("/", methods=["GET"])
+def hello_world():
+    return "Hello World"
+
+
 @app.route("/all-points", methods=["GET"])
 def get_all_points():
     litter_posts = db.posts.find()
