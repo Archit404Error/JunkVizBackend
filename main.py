@@ -1,17 +1,19 @@
+import os
+
 import requests
 from bson import json_util
+from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 from pymongo import MongoClient
 
 app = Flask(__name__)
-db = MongoClient(
-    "mongodb+srv://admin:admin@trash.lxiq1x5.mongodb.net/?retryWrites=true&w=majority"
-)
+load_dotenv()
+db = MongoClient(os.environ.get("CONNECTION_STR")).get_database("Trash")
 
 
 @app.route("/all-points", methods=["GET"])
 def get_all_points():
-    litter_posts = db.Trash.posts.find()
+    litter_posts = db.posts.find()
     return json_util.dumps(list(litter_posts))
 
 
