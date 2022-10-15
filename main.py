@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import datetime
 
 import boto3
 import botocore
@@ -51,11 +52,26 @@ def get_all_points():
     return json_util.dumps(list(litter_posts))
 
 
-@app.route("/classify", methods=["POST"])
-def classify_image():
-    data = request.files["image"]
+@app.route("/register-user", methods=["POST"])
+def register_user():
+    token = request.json.get("token")
+    db.users.insert_one({"token": token})
+    return json.dumps({"success": True})
 
-    ## some logic here
+
+@app.route("/add-point", methods=["POST"])
+def classify_image():
+    classified_image = request.files["classified_image"]
+    db.posts.insert_one(
+        {
+            "image": os.getenv("AWS_DOMAIN") + upload(classified_image),
+            "litter_type": request.json.get("litter_type"),
+            "latitude": request.json.get("latitude"),
+            "longitude": request.json.get("longitude"),
+            "location": request.json.get("location"),
+            "time": datetime.utcnow(),
+        }
+    )
 
     return jsonify({"success": True})
 
