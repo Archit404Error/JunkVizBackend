@@ -5,7 +5,7 @@ from datetime import datetime
 import boto3
 import botocore
 import requests
-from bson import json_util
+from bson import json_util, ObjectId
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 from pymongo import MongoClient
@@ -17,7 +17,7 @@ db = MongoClient(os.environ.get("CONNECTION_STR")).get_database("Trash")
 s3 = boto3.client(
     "s3",
     aws_access_key_id=os.getenv("AWS_ACCESS_KEY"),
-    aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
+    aws_secret_access_key="UpGWEeFADu+m+OG9Fu1NKvIIi+K67eCOsn9FcZpb",
 )
 
 
@@ -69,6 +69,7 @@ def classify_image():
             "longitude": request.json.get("longitude"),
             "location": request.json.get("location"),
             "time": datetime.utcnow(),
+            "status": "litter",
         }
     )
 
@@ -87,6 +88,15 @@ def send_notifs():
     )
 
     return jsonify({})
+
+
+@app.route("/update-point", methods=["POST"])
+def update_point():
+    db.posts.update_one(
+        {"_id": ObjectId(request.json.get("id"))},
+        {"$set": {"status": request.json.get("status")}},
+    )
+    return jsonify({"success": True})
 
 
 if __name__ == "__main__":
