@@ -5,7 +5,7 @@ from datetime import datetime
 import boto3
 import botocore
 import requests
-from bson import json_util, ObjectId
+from bson import ObjectId, json_util
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 from pymongo import MongoClient
@@ -35,6 +35,17 @@ def upload(file):
     return file.filename
 
 
+def notify_vol(token):
+    requests.post(
+        "https://exp.host/--/api/v2/push/send",
+        json={
+            "to": token,
+            "title": "Junk Viz - Trash Detected",
+            "body": "New trash detected in your area",
+        },
+    )
+
+
 @app.route("/", methods=["GET"])
 def hello_world():
     return "Hello World"
@@ -61,9 +72,10 @@ def register_user():
 
 @app.route("/add-point", methods=["POST"])
 def classify_image():
-    if request.json.get("detected"):
-        db.posts.insert_one(
-            {
+    db.posts.update_one(
+        {"image": request.json.get("image")},
+        {
+            "$set": {
                 "image": request.json.get("image"),
                 "litter_type": request.json.get("litter_type"),
                 "latitude": request.json.get("latitude"),
@@ -72,7 +84,13 @@ def classify_image():
                 "time": datetime.utcnow(),
                 "status": "litter",
             }
-        )
+        },
+        upsert=True,
+    )
+
+    all_users = db.users.find()
+    for user in all_users:
+        notify_vol(user["token"])
 
     return jsonify({"success": True})
 
